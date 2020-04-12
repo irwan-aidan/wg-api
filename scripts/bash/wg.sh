@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 cd `dirname ${BASH_SOURCE[0]}`
+WG_CONFIG="/etc/wireguard/wg0.conf"
 
 . ../data/wg.def
 CLIENT_TPL_FILE=../data/client.conf.tpl
