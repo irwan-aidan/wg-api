@@ -74,13 +74,6 @@ add_user() {
     LASTIP=$( grep "/32" $WG_CONFIG | tail -n1 | awk '{print $3}' | cut -d "/" -f 1 | cut -d "." -f 4 )
     CLIENT_ADDRESS="${PRIVATE_SUBNET::-4}$((LASTIP+1))"
 
-    echo "# $PRIVATE_SUBNET $SERVER_HOST:$SERVER_PORT $SERVER_PUBKEY $CLIENT_DNS
-[Interface]
-Address = $GATEWAY_ADDRESS/$PRIVATE_SUBNET_MASK
-ListenPort = $SERVER_PORT
-PrivateKey = $SERVER_PRIVKEY
-SaveConfig = false" > $WG_CONFIG
-
     echo "[Interface]
 PrivateKey = $CLIENT_PRIVKEY
 Address = $CLIENT_ADDRESS/$PRIVATE_SUBNET_MASK
