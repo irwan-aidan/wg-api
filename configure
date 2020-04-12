@@ -9,17 +9,9 @@ fi
 
 sudo apt update
 
-# Go to $HOME
-
-cd ~
-
 # Install required deps
 
 sudo apt-get install nodejs npm -y
-
-# Clone the api
-git clone https://github.com/alectrocute/wg-api
-cd wg-api
 
 # Install Node Deps.
 
