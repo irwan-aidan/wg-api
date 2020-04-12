@@ -62,36 +62,34 @@ add_user() {
     local userdir="../../profiles/$user"
 
     mkdir -p "$userdir"
-    wg genkey | tee $userdir/privatekey | wg pubkey > $userdir/publickey
 
-    # client config file
-    _PRIVATE_KEY=`cat $userdir/privatekey`
-    _VPN_IP=$(get_vpn_ip)
-    if [[ -z $_VPN_IP ]]; then
-        echo -e "\e[44m[wg-api cli]\e[0m No available IP"
-        exit 1
-    fi
-    _TABLE=auto
-    if [[ ! -z "$route" ]]; then
-	_TABLE=off
-    fi
-    eval "echo \"$(cat "${template_file}")\"" > $userdir/wg0.conf
-    qrencode -o $userdir/$user.png  < $userdir/wg0.conf
+    CLIENT_PRIVKEY=$( wg genkey )
+    CLIENT_PUBKEY=$( echo $CLIENT_PRIVKEY | wg pubkey )
+    PRIVATE_SUBNET=$( head -n1 $WG_CONFIG | awk '{print $2}')
+    PRIVATE_SUBNET_MASK=$( echo $PRIVATE_SUBNET | cut -d "/" -f 2 )
+    SERVER_ENDPOINT=$( head -n1 $WG_CONFIG | awk '{print $3}')
+    SERVER_PUBKEY=$( head -n1 $WG_CONFIG | awk '{print $4}')
+    CLIENT_DNS=$( head -n1 $WG_CONFIG | awk '{print $5}')
+    LASTIP=$( grep "/32" $WG_CONFIG | tail -n1 | awk '{print $3}' | cut -d "/" -f 1 | cut -d "." -f 4 )
+    CLIENT_ADDRESS="${PRIVATE_SUBNET::-4}$((LASTIP+1))"
+    echo "# $CLIENT_NAME
+[Peer]
+PublicKey = $CLIENT_PUBKEY
+AllowedIPs = $CLIENT_ADDRESS/32" >> $WG_CONFIG
 
-    # change wg config
-    local ip=${_VPN_IP%/*}/32
-    if [[ ! -z "$route" ]]; then
-	ip="0.0.0.0/0,::/0"
-    fi
-    local public_key=`cat $userdir/publickey`
-    wg set $interface peer $public_key allowed-ips $ip
-    if [[ $? -ne 0 ]]; then
-        echo "wg set failed"
-        rm -rf $user
-        exit 1
-    fi
+    echo "[Interface]
+PrivateKey = $CLIENT_PRIVKEY
+Address = $CLIENT_ADDRESS/$PRIVATE_SUBNET_MASK
+DNS = $CLIENT_DNS
+[Peer]
+PublicKey = $SERVER_PUBKEY
+AllowedIPs = 0.0.0.0/0, ::/0
+Endpoint = $SERVER_ENDPOINT
+PersistentKeepalive = 25" > $userdir/wg0.conf
+qrencode -o $userdir/$user.png  < $userdir/wg0.conf
 
-    echo -e "\e[44m[wg-api cli]\e[0m Created $user"
+    ip address | grep -q wg0 && wg set wg0 peer "$CLIENT_PUBKEY" allowed-ips "$CLIENT_ADDRESS/32"
+    echo "Client added, new configuration file --> $userdir/wg0.conf"
 }
 
 del_user() {
