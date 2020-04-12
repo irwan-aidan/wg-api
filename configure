@@ -9,25 +9,25 @@ fi
 
 sudo apt update
 
-# Install required deps
-
-sudo apt-get install nodejs npm -y
-
-# Install Node Deps.
-
-npm install fastify fastify-static chalk ini --verbose
-
-# Install PM2
-
-sudo npm i -g pm2 --verbose
-
 # Install Wireguard.
 
 cd ./scripts/bash
 
 bash installer.sh
 
-# Installtion completed.
+# Install required deps
+
+sudo apt-get install nodejs npm -y
+
+# Install Node Deps.
+
+npm install fastify fastify-static chalk ini
+
+# Install PM2
+
+sudo npm i -g pm2
+
+# Installation completed.
 # Booting up http server
 
 cd ~/wg-api
@@ -36,7 +36,7 @@ pm2 start server.js
 
 echo "Cleaning Up..."
 
-sleep 2
+sleep 5
 
 clear
 
