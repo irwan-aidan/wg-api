@@ -73,10 +73,6 @@ add_user() {
     CLIENT_DNS=$( head -n1 $WG_CONFIG | awk '{print $5}')
     LASTIP=$( grep "/32" $WG_CONFIG | tail -n1 | awk '{print $3}' | cut -d "/" -f 1 | cut -d "." -f 4 )
     CLIENT_ADDRESS="${PRIVATE_SUBNET::-4}$((LASTIP+1))"
-    echo "# $CLIENT_NAME
-[Peer]
-PublicKey = $CLIENT_PUBKEY
-AllowedIPs = $CLIENT_ADDRESS/32" >> $WG_CONFIG
 
     echo "[Interface]
 PrivateKey = $CLIENT_PRIVKEY
