@@ -74,6 +74,11 @@ add_user() {
     LASTIP=$( grep "/32" $WG_CONFIG | tail -n1 | awk '{print $3}' | cut -d "/" -f 1 | cut -d "." -f 4 )
     CLIENT_ADDRESS="${PRIVATE_SUBNET::-4}$((LASTIP+1))"
 
+
+    FROMIP=$( grep "/32" $WG_CONFIG | tail -n1 | awk '{print $3}' | cut -d "/" -f 1)
+
+    sed -i "s/$FROMIP/$CLIENT_ADDRESS/g" $WG_CONFIG
+
     echo "[Interface]
 PrivateKey = $CLIENT_PRIVKEY
 Address = $CLIENT_ADDRESS/$PRIVATE_SUBNET_MASK
