@@ -74,6 +74,13 @@ add_user() {
     LASTIP=$( grep "/32" $WG_CONFIG | tail -n1 | awk '{print $3}' | cut -d "/" -f 1 | cut -d "." -f 4 )
     CLIENT_ADDRESS="${PRIVATE_SUBNET::-4}$((LASTIP+1))"
 
+    echo "# $PRIVATE_SUBNET $SERVER_HOST:$SERVER_PORT $SERVER_PUBKEY $CLIENT_DNS
+[Interface]
+Address = $GATEWAY_ADDRESS/$PRIVATE_SUBNET_MASK
+ListenPort = $SERVER_PORT
+PrivateKey = $SERVER_PRIVKEY
+SaveConfig = false" > $WG_CONFIG
+
     echo "[Interface]
 PrivateKey = $CLIENT_PRIVKEY
 Address = $CLIENT_ADDRESS/$PRIVATE_SUBNET_MASK
@@ -111,23 +118,7 @@ del_user() {
 }
 
 generate_and_install_server_config_file() {
-    local template_file=${SERVER_TPL_FILE}
-    local ip
-
-    # server config file
-    eval "echo \"$(cat "${template_file}")\"" > $WG_TMP_CONF_FILE
-    while read user vpn_ip public_key; do
-        ip=${vpn_ip%/*}/32
-        if [[ ! -z "$route" ]]; then
-            ip="0.0.0.0/0,::/0"
-        fi
-        cat >> $WG_TMP_CONF_FILE <<EOF
-[Peer]
-PublicKey = $public_key
-AllowedIPs = $ip
-EOF
-    done < ${SAVED_FILE}
-    \cp -f $WG_TMP_CONF_FILE $WG_CONF_FILE
+    echo "VOID"
 }
 
 clear_all() {
