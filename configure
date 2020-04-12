@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+if [[ "$EUID" -ne 0 ]]; then
+    echo "Sorry, you need to run this as root"
+    exit
+fi
+
+# Update deps.
+
+sudo apt update
+
+# Go to $HOME
+
+cd ~
+
+# Install required deps
+
+sudo apt-get install nodejs npm -y
+
+# Clone the api
+git clone https://github.com/alectrocute/wg-api
+cd wg-api
+
+# Install Node Deps.
+
+npm install fastify fastify-static chalk ini --verbose
+
+# Install PM2
+
+sudo npm i -g pm2 --verbose
+
+# Install Wireguard.
+
+cd ./scripts/bash
+
+bash installer.sh
+
+# Installtion completed.
+# Booting up http server
+
+cd ~/wg-api
+
+pm2 start server.js
+
+echo "Cleaning Up..."
+
+sleep 2
+
+clear
+
+echo "WireGuard Installation Completed!";
+
+
+
